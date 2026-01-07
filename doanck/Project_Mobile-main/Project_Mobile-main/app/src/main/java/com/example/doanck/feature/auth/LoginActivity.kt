@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.doanck.R
 import com.example.doanck.data.remote.supabase.AuthStore
+import com.example.doanck.data.remote.supabase.SignInRequest
 import com.example.doanck.data.remote.supabase.SupabaseAuthClient
 import com.example.doanck.data.remote.supabase.TokenResponse
 import com.example.doanck.feature.category.CategoryActivity
@@ -44,18 +45,20 @@ class LoginActivity : AppCompatActivity() {
     private fun doLogin() {
         val email = etEmail.text?.toString()?.trim().orEmpty()
         val pass = etPassword.text?.toString()?.trim().orEmpty()
+
         if (email.isBlank() || pass.isBlank()) {
             Toast.makeText(this, "Vui lòng nhập email & mật khẩu", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val body = mapOf("email" to email, "password" to pass)
+        val req = SignInRequest(email = email, password = pass)
 
-        SupabaseAuthClient.service.signIn("password", body)
+        SupabaseAuthClient.service.signIn(grantType = "password", body = req)
             .enqueue(object : Callback<TokenResponse> {
                 override fun onResponse(call: Call<TokenResponse>, response: Response<TokenResponse>) {
                     if (response.isSuccessful && response.body() != null) {
                         val r = response.body()!!
+
                         AuthStore.save(
                             this@LoginActivity,
                             r.accessToken,
@@ -73,7 +76,11 @@ class LoginActivity : AppCompatActivity() {
                             finish()
                         }
                     } else {
-                        Toast.makeText(this@LoginActivity, SupabaseAuthClient.parseError(response), Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this@LoginActivity,
+                            SupabaseAuthClient.parseError(response),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
 
@@ -82,4 +89,5 @@ class LoginActivity : AppCompatActivity() {
                 }
             })
     }
+
 }

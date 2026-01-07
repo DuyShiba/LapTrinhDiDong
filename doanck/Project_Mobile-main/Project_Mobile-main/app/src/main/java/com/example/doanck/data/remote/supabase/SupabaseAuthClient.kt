@@ -14,20 +14,20 @@ object SupabaseAuthClient {
 
     val service: SupabaseAuthService by lazy {
         val log = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
+            level = HttpLoggingInterceptor.Level.BODY
         }
 
         val ok = OkHttpClient.Builder()
             .addInterceptor(Interceptor { chain ->
                 val original = chain.request()
                 val b: Request.Builder = original.newBuilder()
-                    .header("apikey", SupabaseConfig.SUPABASE_ANON_KEY)
+                    .header("apikey", SupabaseConfig.SUPABASE_KEY)
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json")
 
                 // default Authorization nếu chưa có
                 if (original.header("Authorization") == null) {
-                    b.header("Authorization", "Bearer ${SupabaseConfig.SUPABASE_ANON_KEY}")
+                    b.header("Authorization", "Bearer ${SupabaseConfig.SUPABASE_KEY}")
                 }
                 chain.proceed(b.build())
             })

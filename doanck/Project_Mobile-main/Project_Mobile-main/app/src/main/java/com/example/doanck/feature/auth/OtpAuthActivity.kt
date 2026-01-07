@@ -9,11 +9,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.doanck.R
+import com.example.doanck.data.remote.supabase.RecoverRequest
 import com.example.doanck.data.remote.supabase.SupabaseAuthClient
 import com.example.doanck.data.remote.supabase.SupabaseConfig
 import com.example.doanck.data.remote.supabase.TokenResponse
+import com.example.doanck.data.remote.supabase.VerifyOtpRequest
 import com.google.android.material.textfield.TextInputEditText
-import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -67,11 +68,11 @@ class OtpAuthActivity : AppCompatActivity() {
     private fun verifyOtp(email: String, otp: String) {
         progress.show()
 
-        val body = mapOf(
-            "type" to type,               // "recovery" hoặc "signup"...
-            "email" to email,
-            "token" to otp,
-            "redirect_to" to SupabaseConfig.RECOVER_REDIRECT_TO
+        val body = VerifyOtpRequest(
+            type = type,
+            email = email,
+            token = otp,
+            redirect_to = SupabaseConfig.RECOVER_REDIRECT_TO
         )
 
         SupabaseAuthClient.service.verify(body).enqueue(object : Callback<TokenResponse> {
@@ -112,13 +113,13 @@ class OtpAuthActivity : AppCompatActivity() {
         }
 
         progress.show()
-        val body = mapOf(
-            "email" to em,
-            "redirect_to" to SupabaseConfig.RECOVER_REDIRECT_TO
+        val body = RecoverRequest(
+            email = em,
+            redirect_to = SupabaseConfig.RECOVER_REDIRECT_TO
         )
 
-        SupabaseAuthClient.service.recover(body).enqueue(object : Callback<ResponseBody> {
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+        SupabaseAuthClient.service.recover(body).enqueue(object : Callback<Unit> {
+            override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
                 progress.dismiss()
                 if (response.isSuccessful) {
                     Toast.makeText(this@OtpAuthActivity, "OTP đã được gửi lại (check email)", Toast.LENGTH_SHORT).show()
@@ -127,7 +128,7 @@ class OtpAuthActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+            override fun onFailure(call: Call<Unit>, t: Throwable) {
                 progress.dismiss()
                 Toast.makeText(this@OtpAuthActivity, "Network error: ${t.message}", Toast.LENGTH_LONG).show()
             }

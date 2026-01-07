@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.doanck.R
 import com.example.doanck.data.remote.supabase.SbUser
 import com.example.doanck.data.remote.supabase.SupabaseAuthClient
+import com.example.doanck.data.remote.supabase.UpdatePasswordRequest
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import retrofit2.Call
@@ -67,7 +68,7 @@ class ResetPasswordActivity : AppCompatActivity() {
         if (pass.length < 6) { etNewPass.error = "Tối thiểu 6 ký tự"; return }
         if (pass != confirm) { etConfirm.error = "Không khớp"; return }
 
-        val body = mapOf("password" to pass)
+        val body = UpdatePasswordRequest(password = pass)
 
         SupabaseAuthClient.service.updateUser("Bearer $token", body)
             .enqueue(object : Callback<SbUser> {

@@ -26,6 +26,7 @@
         <activity android:name=".feature.auth.RegisterActivity" />
         <activity android:name=".feature.auth.ForgotPasswordActivity" />
         <activity android:name=".feature.auth.OtpAuthActivity" />
+        <activity android:name=".feature.category.CategoryActivity" />
 
         <activity android:name=".feature.auth.ResetPasswordActivity"
             android:exported="true">

@@ -5,11 +5,11 @@ import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.doanck.R
+import com.example.doanck.data.remote.supabase.RecoverRequest
 import com.example.doanck.data.remote.supabase.SupabaseAuthClient
 import com.example.doanck.data.remote.supabase.SupabaseConfig
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
-import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -38,22 +38,27 @@ class ForgotPasswordActivity : AppCompatActivity() {
             etEmail.error = "Email không hợp lệ"; return
         }
 
-        val body = mapOf(
-            "email" to email,
-            "redirect_to" to SupabaseConfig.RECOVER_REDIRECT_TO
+        val body = RecoverRequest(
+            email = email,
+            redirect_to = SupabaseConfig.RECOVER_REDIRECT_TO
         )
 
-        SupabaseAuthClient.service.recover(body).enqueue(object : Callback<ResponseBody> {
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+        SupabaseAuthClient.service.recover(body).enqueue(object : Callback<Unit> {
+            override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(this@ForgotPasswordActivity, "Đã gửi email reset. Hãy mở email và bấm link.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@ForgotPasswordActivity, "Đã gửi OTP đến email của bạn.", Toast.LENGTH_SHORT).show()
+                    // ✅ Chuyển sang màn nhập OTP
+                    val intent = android.content.Intent(this@ForgotPasswordActivity, OtpAuthActivity::class.java)
+                        .putExtra("email", email)
+                        .putExtra("type", "recovery")
+                    startActivity(intent)
                     finish()
                 } else {
                     Toast.makeText(this@ForgotPasswordActivity, SupabaseAuthClient.parseError(response), Toast.LENGTH_LONG).show()
                 }
             }
 
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+            override fun onFailure(call: Call<Unit>, t: Throwable) {
                 Toast.makeText(this@ForgotPasswordActivity, "Network error: ${t.message}", Toast.LENGTH_LONG).show()
             }
         })
